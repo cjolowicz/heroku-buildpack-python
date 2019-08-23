@@ -224,6 +224,13 @@ export CACHED_PYTHON_STACK
 # shellcheck source=bin/steps/pipenv-python-version
 source "$BIN_DIR/steps/pipenv-python-version"
 
+# Poetry Python version support.
+# Detect the version of Python requested from a pyproject.toml.
+# Convert it to a runtime.txt file.
+
+# shellcheck source=bin/steps/poetry-python-version
+source "$BIN_DIR/steps/poetry-python-version"
+
 # If no runtime was provided by the user, assume the default Python runtime version.
 if [ ! -f runtime.txt ]; then
   echo "$DEFAULT_PYTHON_VERSION" > runtime.txt
