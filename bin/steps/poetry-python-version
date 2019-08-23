@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# Determine Python version from pyproject.toml, if no runtime.txt is present.
+if [ ! -f $BUILD_DIR/runtime.txt ] &&
+       [ -f $BUILD_DIR/pyproject.toml ] &&
+       [ -f $BUILD_DIR/poetry.lock ]; then
+    # The Python version is specified in the section [tool.poetry.dependencies]
+    # under the `python` key.
+    beg='^ *\[tool.poetry.dependencies\]'
+    end='^ *\['
+    pat='^ *python *= *"\([^"]*\)"'
+
+    PYTHON=$(sed -n "/$beg/,/$end/s/$pat/\\1/p" pyproject.toml)
+
+    # We only handle a few simple cases here. If the Python version constraints
+    # are any more complicated, the user needs to provide an explicit
+    # runtime.txt.
+    case $PYTHON in
+        '^2.7' | '^2.7.'* | '~2.7' | '~2.7.'* | '2.7.*' | "${LATEST_27#python-}")
+            echo "$LATEST_27" > "$BUILD_DIR/runtime.txt"
+            ;;
+
+        '^3.4' | '^3.4.'* | '~3.4' | '~3.4.'* | '3.4.*' | "${LATEST_34#python-}")
+            echo "$LATEST_34" > "$BUILD_DIR/runtime.txt"
+            ;;
+
+        '^3.5' | '^3.5.'* | '~3.5' | '~3.5.'* | '3.5.*' | "${LATEST_35#python-}")
+            echo "$LATEST_35" > "$BUILD_DIR/runtime.txt"
+            ;;
+
+        '^3.6' | '^3.6.'* | '~3.6' | '~3.6.'* | '3.6.*' | "${LATEST_36#python-}")
+            echo "$LATEST_36" > "$BUILD_DIR/runtime.txt"
+            ;;
+
+        '^3.7' | '^3.7.'* | '~3.7' | '~3.7.'* | '3.7.*' | "${LATEST_37#python-}")
+            echo "$LATEST_37" > "$BUILD_DIR/runtime.txt"
+            ;;
+    esac
+fi
