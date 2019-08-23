@@ -83,6 +83,12 @@ make test-heroku-18
 make test-heroku-16
 ```
 
+You can also specify which tests to run:
+
+```
+make test TESTS="testPython3_7 testGitEgg"
+```
+
 The tests are run via the vendored
 [shunit2](https://github.com/kward/shunit2)
 test framework.

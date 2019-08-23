@@ -264,3 +264,13 @@ release() {
 assertFile() {
   assertEquals "$1" "$(cat ${compile_dir}/$2)"
 }
+
+# If TESTS is present in the environment, only run the specified tests.
+if [ -n "$TESTS" ]; then
+    suite() {
+        for shunit_func_ in ${TESTS}; do
+            suite_addTest ${shunit_func_}
+        done
+        unset shunit_func_
+    }
+fi
