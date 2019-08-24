@@ -315,4 +315,17 @@ assertFile() {
   assertEquals "$1" "$(cat ${compile_dir}/$2)"
 }
 
+# If tests are passed as command-line arguments, only run those tests.
+if [ $# -gt 0 ]; then
+  shunit_funcs_="$*"
+  set --
+
+  suite() {
+    for shunit_func_ in ${shunit_funcs_}; do
+      suite_addTest ${shunit_func_}
+    done
+    unset shunit_func_
+  }
+fi
+
 source $(pwd)/test/shunit2
