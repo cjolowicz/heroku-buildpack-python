@@ -269,7 +269,9 @@ assertFile() {
 if [ -n "$TESTS" ]; then
     suite() {
         for shunit_func_ in ${TESTS}; do
-            suite_addTest ${shunit_func_}
+            if declare -F ${shunit_func_} > /dev/null; then
+                suite_addTest ${shunit_func_}
+            fi
         done
         unset shunit_func_
     }
