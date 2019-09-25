@@ -274,5 +274,12 @@ if [ -n "$TESTS" ]; then
             fi
         done
         unset shunit_func_
+
+        if [ -z "$__shunit_suite" ]; then
+            testNoop() {
+                echo "Skipping tests because they do not match TESTS."
+            }
+            suite_addTest testNoop
+        fi
     }
 fi
