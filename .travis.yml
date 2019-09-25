@@ -9,12 +9,8 @@ before_script:
   - bundle exec hatchet ci:setup
 
 script:
-  - docker build --pull --tag travis-build-cedar-14 --file $(pwd)/builds/cedar-14.Dockerfile .
-  - docker run --rm -e "STACK=cedar-14" -e "USE_STAGING_BINARIES=$USE_STAGING_BINARIES" travis-build-cedar-14 bash $TESTFOLDER
-  - docker build --pull --tag travis-build-heroku-16 --file $(pwd)/builds/heroku-16.Dockerfile .
-  - docker run --rm -e "STACK=heroku-16" -e "USE_STAGING_BINARIES=$USE_STAGING_BINARIES" travis-build-heroku-16 bash $TESTFOLDER
-  - docker build --pull --tag travis-build-heroku-18 --file $(pwd)/builds/heroku-18.Dockerfile .
-  - docker run --rm -e "STACK=heroku-18" -e "USE_STAGING_BINARIES=$USE_STAGING_BINARIES" travis-build-heroku-18 bash $TESTFOLDER
+  - docker build --pull --tag travis-build-$STACK --file $(pwd)/builds/$STACK.Dockerfile .
+  - docker run --rm -e "STACK=$STACK" -e "USE_STAGING_BINARIES=$USE_STAGING_BINARIES" travis-build-$STACK bash $TESTFOLDER
 
 jobs:
   include:
@@ -27,12 +23,24 @@ jobs:
     script: "bundle exec rspec"
 env:
   matrix:
-    - TESTFOLDER=test/run-deps
-    - TESTFOLDER=test/run-deps USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
-    - TESTFOLDER=test/run-versions
-    - TESTFOLDER=test/run-versions USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
-    - TESTFOLDER=test/run-features
-    - TESTFOLDER=test/run-features USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=cedar-14 TESTFOLDER=test/run-deps
+    - STACK=cedar-14 TESTFOLDER=test/run-deps USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=cedar-14 TESTFOLDER=test/run-versions
+    - STACK=cedar-14 TESTFOLDER=test/run-versions USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=cedar-14 TESTFOLDER=test/run-features
+    - STACK=cedar-14 TESTFOLDER=test/run-features USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=heroku-16 TESTFOLDER=test/run-deps
+    - STACK=heroku-16 TESTFOLDER=test/run-deps USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=heroku-16 TESTFOLDER=test/run-versions
+    - STACK=heroku-16 TESTFOLDER=test/run-versions USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=heroku-16 TESTFOLDER=test/run-features
+    - STACK=heroku-16 TESTFOLDER=test/run-features USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=heroku-18 TESTFOLDER=test/run-deps
+    - STACK=heroku-18 TESTFOLDER=test/run-deps USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=heroku-18 TESTFOLDER=test/run-versions
+    - STACK=heroku-18 TESTFOLDER=test/run-versions USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
+    - STACK=heroku-18 TESTFOLDER=test/run-features
+    - STACK=heroku-18 TESTFOLDER=test/run-features USE_STAGING_BINARIES=https://lang-python.s3.amazonaws.com/staging
   global:
     - HATCHET_RETRIES=3
     - IS_RUNNING_ON_CI=true
