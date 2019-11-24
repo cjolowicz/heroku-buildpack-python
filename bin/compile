@@ -62,7 +62,25 @@ PY27="python-2.7"
 # Which stack is used (for binary downloading), if none is provided (e.g. outside of Heroku)?
 DEFAULT_PYTHON_STACK="cedar-14"
 # If pip doesn't match this version (the version we install), run the installer.
-PIP_UPDATE="9.0.2"
+PIP_UPDATE="19.2.3"
+
+for file in "$BUILD_DIR/runtime.txt" "$CACHE_DIR/.heroku/python-version" ; do
+    [ -f "$file" ] || continue
+
+    version=$(tr -d '[:space:]' < "$file")
+
+    case "$version" in "$PY34"*)
+        # Python 3.4 support was dropped in pip >= 19.2.
+        PIP_UPDATE="19.1.1"
+        break
+        ;;
+    esac
+done
+
+if [[ -f "$BUILD_DIR/Pipfile" ]]; then
+    # Do not force pipenv users to re-install pipenv locally.
+    PIP_UPDATE="9.0.2"
+fi
 
 export DEFAULT_PYTHON_STACK PIP_UPDATE
 export PY37 PY36 PY35 PY27 PY34
@@ -206,6 +224,13 @@ export CACHED_PYTHON_STACK
 # shellcheck source=bin/steps/pipenv-python-version
 source "$BIN_DIR/steps/pipenv-python-version"
 
+# Poetry Python version support.
+# Detect the version of Python requested from a pyproject.toml.
+# Convert it to a runtime.txt file.
+
+# shellcheck source=bin/steps/poetry-python-version
+source "$BIN_DIR/steps/poetry-python-version"
+
 # If no runtime was provided by the user, assume the default Python runtime version.
 if [ ! -f runtime.txt ]; then
   echo "$DEFAULT_PYTHON_VERSION" > runtime.txt
@@ -239,6 +264,10 @@ mtime "python.install.time" "${start}"
 # shellcheck source=bin/steps/pipenv
 source "$BIN_DIR/steps/pipenv"
 
+# Export requirements.txt from poetry.lock, if present.
+# shellcheck source=bin/steps/poetry
+source "$BIN_DIR/steps/poetry"
+
 # Uninstall removed dependencies with Pip.
 # The buildpack will automatically remove any declared dependencies (in requirements.txt)
 # that were explicitly removed. This machinery is a bit complex, but it is not complicated.
@@ -250,9 +279,8 @@ mtime "pip.uninstall.time" "${start}"
 # If no requirements.txt file given, assume `setup.py develop` is intended.
 # This allows for people to ship a setup.py application to Heroku
 # (which is rare, but I vouch that it should work!)
-
-if [ ! -f requirements.txt ] && [ ! -f Pipfile ]; then
-  echo "-e ." > requirements.txt
+if [ ! -f requirements.txt ] && [ ! -f Pipfile ] && [ ! -f pyproject.toml ]; then
+    echo "-e ." > requirements.txt
 fi
 
 # Fix egg-links.
