@@ -264,3 +264,22 @@ release() {
 assertFile() {
   assertEquals "$1" "$(cat ${compile_dir}/$2)"
 }
+
+# If TESTS is present in the environment, only run the specified tests.
+if [ -n "$TESTS" ]; then
+    suite() {
+        for shunit_func_ in ${TESTS}; do
+            if declare -F ${shunit_func_} > /dev/null; then
+                suite_addTest ${shunit_func_}
+            fi
+        done
+        unset shunit_func_
+
+        if [ -z "$__shunit_suite" ]; then
+            testNoop() {
+                echo "Skipping tests because they do not match TESTS."
+            }
+            suite_addTest testNoop
+        fi
+    }
+fi
